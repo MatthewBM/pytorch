@@ -406,6 +406,7 @@ jobs:
         with:
           fetch-depth: 0 # deep clone, to allow sharding to use git rev-list
           submodules: recursive
+      
       - name: Pull docker image
         run: |
           docker pull "${DOCKER_IMAGE}"
@@ -446,6 +447,15 @@ jobs:
         run: |
           # Ensure the working directory gets chowned back to the current user
           docker run --rm -v "$(pwd)":/v -w /v "${ALPINE_IMAGE}" chown -R "$(id -u):$(id -g)" .
+      - name: show the stuff
+        run: find ${GITHUB_WORKSPACE}/pytorch.github.io/
+      - uses: driazati/upload-artifact-s3@f0a4a423c1e8743cf07460a483f26f230e6a2d68
+        name: Upload docs preview
+        with:
+          name: deploy
+          retention-days: 14
+          if-no-files-found: error
+          path: ${GITHUB_WORKSPACE}/pytorch.github.io/docs/master
       - name: Archive artifacts into zip
         run: |
           zip -r pytorch_github_io.zip "${GITHUB_WORKSPACE}/pytorch.github.io"
